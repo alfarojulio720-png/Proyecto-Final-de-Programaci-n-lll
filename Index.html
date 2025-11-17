@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mapa de Locales</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<style>
+body { margin:0; font-family: Arial, sans-serif }
+#map { position:absolute; top:60px; bottom:0; left:0; right:350px }
+#panel { position:absolute; top:60px; right:0; width:350px; bottom:0; overflow:auto; padding:12px; background:#fff; box-shadow:-2px 0 6px rgba(0,0,0,0.15)}
+#topbar { position: absolute; top:0; left:0; right:0; height:60px; background:#0d6efd; color:#fff; display:flex; align-items:center; gap:12px; padding:8px 16px }
+.btn { background:rgba(255,255,255,0.12); padding:8px 12px; border-radius:6px; cursor:pointer }
+</style>
+</head>
+<body>
+<div id="topbar">
+<div style="font-weight:700">Mapa de Locales</div>
+<div class="btn" onclick="cargarFiltro('ventas')">Ventas</div>
+<div class="btn" onclick="cargarFiltro('compras')">Compras</div>
+<div class="btn" onclick="cargarFiltro('ganancia')">Ganancia</div>
+<div style="margin-left:auto">Mes: <input type="month" id="mesinput" onchange="cargarFiltroActual()"/></div>
+</div>
+
+
+<div id="map"></div>
+<div id="panel"><h3>Selecciona un local</h3></div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
