@@ -1,4 +1,4 @@
-const API = 'http://127.0.0.1:3006';
+const API = 'http://localhost:8000';
 const map = L.map('map').setView([41.3879, 2.16992], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
