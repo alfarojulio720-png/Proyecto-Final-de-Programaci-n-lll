@@ -8,6 +8,7 @@ let markers = L.layerGroup().addTo(map);
 
 let currentMes = null;
 let currentAnio = null;
+let filtroEmpresa = "todas";
 
 // Ícono según porcentaje
 function iconoPorcentaje(porcentaje) {
@@ -35,7 +36,12 @@ async function cargarLocales() {
     markers.clearLayers();
 
     const res = await fetch(`${API}/locales`);
-    const locales = await res.json();
+    let locales = await res.json();
+
+    // FILTRO POR EMPRESA
+    if (filtroEmpresa !== "todas") {
+        locales = locales.filter(l => l.empresa === filtroEmpresa);
+    }
 
     locales.forEach(local => {
         const marker = L.marker([local.latitud, local.longitud]).addTo(markers);
@@ -93,7 +99,7 @@ async function mostrarDatosLocal(id_local, nombre, empresa, lat, lng, marker) {
                 <b>Ganancia:</b> $${ganancia}<br>
                 <b>Productos vendidos:</b> ${productos}<br><br>
 
-                <b>Porcentaje ganancia:</b>
+                <b>Porcentaje de ganancia:</b>
                 <span style="color:${porcentaje >= 0 ? 'green' : 'red'};">
                     ${porcentaje}%
                 </span>
@@ -106,7 +112,12 @@ async function mostrarDatosLocal(id_local, nombre, empresa, lat, lng, marker) {
 async function calcularTotales() {
 
     const res = await fetch(`${API}/locales`);
-    const locales = await res.json();
+    let locales = await res.json();
+
+    // FILTRO POR EMPRESA
+    if (filtroEmpresa !== "todas") {
+        locales = locales.filter(l => l.empresa === filtroEmpresa);
+    }
 
     let totalVentas = 0;
     let totalCompras = 0;
@@ -125,7 +136,7 @@ async function calcularTotales() {
     let porcentajeTotal = totalVentas > 0 ? ((gananciaTotal / totalVentas) * 100).toFixed(2) : 0;
 
     document.getElementById("panelTotales").innerHTML = `
-        <b>TOTALES GENERALES (${currentMes}/${currentAnio})</b><br>
+        <b>TOTALES GENERALES (${filtroEmpresa === "todas" ? "Todas las empresas" : filtroEmpresa})</b><br>
         Ventas: $${totalVentas}<br>
         Compras: $${totalCompras}<br>
         Ganancia: $${gananciaTotal}<br>
@@ -134,7 +145,7 @@ async function calcularTotales() {
     `;
 }
 
-// Filtros
+// EVENTOS DE FILTRO
 document.getElementById("filtroMes").addEventListener("change", (e) => {
     currentMes = e.target.value;
     cargarLocales();
@@ -145,5 +156,9 @@ document.getElementById("filtroAnio").addEventListener("change", (e) => {
     cargarLocales();
 });
 
-// Iniciar
+document.getElementById("filtroEmpresa").addEventListener("change", (e) => {
+    filtroEmpresa = e.target.value;
+    cargarLocales();
+});
+
 cargarLocales();
