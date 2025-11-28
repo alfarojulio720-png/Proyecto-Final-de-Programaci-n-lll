@@ -1,6 +1,6 @@
 const API = 'http://127.0.0.1:8000';
 
-// Crear mapa centrado en El Salvador
+// MAPA EN EL SALVADOR
 const map = L.map('map').setView([13.70, -89.20], 8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -9,22 +9,28 @@ let markers = L.layerGroup().addTo(map);
 let currentMes = null;
 let currentAnio = null;
 
-// Función para ícono según ganancia
-function iconoGanancia(ganancia) {
+// Ícono según porcentaje
+function iconoPorcentaje(porcentaje) {
+    let color = "gray";
+
+    if (porcentaje > 20) color = "green";
+    else if (porcentaje >= 0) color = "orange";
+    else color = "red";
+
     return L.divIcon({
         className: "",
         html: `
             <div style="
-                width: 18px;
-                height: 18px;
+                width: 22px;
+                height: 22px;
                 border-radius: 50%;
-                background-color: ${ganancia >= 0 ? "green" : "red"};
+                background-color: ${color};
                 border: 2px solid white;">
             </div>`
     });
 }
 
-// Cargar locales
+// Cargar sucursales
 async function cargarLocales() {
     markers.clearLayers();
 
@@ -37,13 +43,24 @@ async function cargarLocales() {
         marker.bindTooltip(`${local.nombre_local} - ${local.empresa}`);
 
         marker.on("click", () => {
-            mostrarDatosLocal(local.id_local, local.nombre_local, local.latitud, local.longitud, marker);
+            mostrarDatosLocal(
+                local.id_local,
+                local.nombre_local,
+                local.empresa,
+                local.latitud,
+                local.longitud,
+                marker
+            );
         });
     });
+
+    if (currentMes && currentAnio) {
+        calcularTotales();
+    }
 }
 
-// Mostrar datos de ventas/compras/ganancia
-async function mostrarDatosLocal(id_local, nombre, lat, lng, marker) {
+// Mostrar ventas, compras, productos, porcentaje
+async function mostrarDatosLocal(id_local, nombre, empresa, lat, lng, marker) {
 
     if (!currentMes || !currentAnio) {
         alert("Selecciona Mes y Año primero.");
@@ -55,27 +72,66 @@ async function mostrarDatosLocal(id_local, nombre, lat, lng, marker) {
 
     let ventas = data.ventas ?? 0;
     let compras = data.compras ?? 0;
+    let productos = data.productos ?? 0;
     let ganancia = ventas - compras;
 
-    // Actualizar ícono
-    marker.setIcon(iconoGanancia(ganancia));
+    let porcentaje = ventas > 0 ? ((ganancia / ventas) * 100).toFixed(2) : 0;
 
-    // Popup
+    marker.setIcon(iconoPorcentaje(porcentaje));
+
     L.popup()
         .setLatLng([lat, lng])
         .setContent(`
             <div style="font-size:14px;">
                 <b>${nombre}</b><br>
+                <b>Empresa:</b> ${empresa}<br><br>
+
                 <b>Mes:</b> ${currentMes}/${currentAnio}<br><br>
+
                 <b>Ventas:</b> $${ventas}<br>
                 <b>Compras:</b> $${compras}<br>
-                <b>Ganancia:</b> 
-                <span style="color:${ganancia >= 0 ? 'green' : 'red'};">
-                    $${ganancia}
+                <b>Ganancia:</b> $${ganancia}<br>
+                <b>Productos vendidos:</b> ${productos}<br><br>
+
+                <b>Porcentaje ganancia:</b>
+                <span style="color:${porcentaje >= 0 ? 'green' : 'red'};">
+                    ${porcentaje}%
                 </span>
             </div>
         `)
         .openOn(map);
+}
+
+// CALCULAR TOTALES GENERALES
+async function calcularTotales() {
+
+    const res = await fetch(`${API}/locales`);
+    const locales = await res.json();
+
+    let totalVentas = 0;
+    let totalCompras = 0;
+    let totalProductos = 0;
+
+    for (let local of locales) {
+        const r = await fetch(`${API}/local/${local.id_local}/mensual?mes=${currentMes}&anio=${currentAnio}`);
+        const data = await r.json();
+
+        totalVentas += data.ventas ?? 0;
+        totalCompras += data.compras ?? 0;
+        totalProductos += data.productos ?? 0;
+    }
+
+    let gananciaTotal = totalVentas - totalCompras;
+    let porcentajeTotal = totalVentas > 0 ? ((gananciaTotal / totalVentas) * 100).toFixed(2) : 0;
+
+    document.getElementById("panelTotales").innerHTML = `
+        <b>TOTALES GENERALES (${currentMes}/${currentAnio})</b><br>
+        Ventas: $${totalVentas}<br>
+        Compras: $${totalCompras}<br>
+        Ganancia: $${gananciaTotal}<br>
+        Productos: ${totalProductos}<br>
+        Porcentaje: ${porcentajeTotal}%<br>
+    `;
 }
 
 // Filtros
@@ -89,5 +145,5 @@ document.getElementById("filtroAnio").addEventListener("change", (e) => {
     cargarLocales();
 });
 
-// Inicio
+// Iniciar
 cargarLocales();
