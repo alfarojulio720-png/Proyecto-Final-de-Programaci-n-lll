@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Mapa de Empresas</title>
-    <link rel="stylesheet" href="styles.css">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,13 +11,13 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            background: #f4f4f4;
             margin: 0;
             padding: 0;
         }
 
         h1 {
-            background: #0078ff;
+            background: #0066cc;
             color: white;
             padding: 15px;
             margin: 0;
@@ -52,7 +51,7 @@
 </head>
 <body>
 
-<h1>Mapa de Empresas – Ventas / Compras / Ganancia / Porcentaje</h1>
+<h1>Mapa de Empresas – Ventas / Compras / Productos / Porcentaje</h1>
 
 <!-- SELECTOR DE EMPRESA -->
 <div class="panel">
@@ -100,9 +99,10 @@
 <!-- MAPA -->
 <div id="map"></div>
 
-<!-- TOTAL DE LA EMPRESA SELECCIONADA -->
+<!-- TOTALIZADOR GENERAL -->
 <div id="panelTotales" class="totales-box">
-    <b>TOTALES GENERALES:</b> Selecciona mes y año.
+    <b>TOTALES GENERALES:</b><br>
+    Selecciona empresa, mes y año.
 </div>
 
 <script src="app.js"></script>
