@@ -127,3 +127,30 @@ def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
     cur.close()
     db.close()
     return rows
+
+@app.get("/local/{id_local}/porcentaje")
+def porcentaje_local(id_local: int, mes: int, anio: int):
+    conn = mysql.connector.connect(**db)
+    cur = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT ventas, compras
+        FROM movimientos_mensuales
+        WHERE id_local = %s AND mes = %s AND anio = %s
+    """
+
+    cur.execute(query, (id_local, mes, anio))
+    data = cur.fetchone()
+
+    ventas = data["ventas"] or 0
+    compras = data["compras"] or 0
+    ganancia = ventas - compras
+    porcentaje = (ganancia / ventas * 100) if ventas > 0 else 0
+
+    return {
+        "id_local": id_local,
+        "ventas": ventas,
+        "compras": compras,
+        "ganancia": ganancia,
+        "porcentaje": round(porcentaje, 2)
+    }
