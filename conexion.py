@@ -6,7 +6,7 @@ def conectar():
             host="localhost",
             user="root",
             password="12345678",
-            database="bd_programacion"  
+            database="mapa_empresas"  
         )
         print("✅ Conexión exitosa a MySQL")
         return conn

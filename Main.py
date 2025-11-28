@@ -3,23 +3,16 @@ import mysql.connector
 
 app = FastAPI()
 
-# -----------------------------
-# CONFIGURACIÓN DE BASE DE DATOS
-# -----------------------------
 DB_CONF = {
     "host": "localhost",
     "user": "root",
     "password": "12345678",
-    "database": "BD programacion"
+    "database": "mapa_empresas"
 }
 
 def get_db():
     return mysql.connector.connect(**DB_CONF)
 
-
-# -----------------------------------------
-# 1. LISTA DE LOCALES + INFORMACIÓN BÁSICA
-# -----------------------------------------
 @app.get("/locales")
 def get_locales():
     db = get_db()
@@ -40,20 +33,14 @@ def get_locales():
     rows = cur.fetchall()
     cur.close()
     db.close()
-
     return rows
 
-
-# ----------------------------------------------
-# 2. DATOS MENSUALES DE UN LOCAL (ventas/compras)
-# ----------------------------------------------
 @app.get("/local/{id_local}/mensual")
 def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Si vienen mes y año → retorna datos del mes
-    if mes is not None and anio is not None:
+    if mes and anio:
         cur.execute("""
             SELECT ventas, compras, (ventas - compras) AS ganancia
             FROM movimientos_mensuales
@@ -66,10 +53,8 @@ def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
 
         if not row:
             raise HTTPException(status_code=404, detail="Datos no encontrados")
-
         return row
 
-    # Si NO se pasan mes y año → RESUMEN ANUAL
     cur.execute("""
         SELECT 
             SUM(ventas) AS ventas, 
@@ -82,23 +67,17 @@ def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
     row = cur.fetchone()
     cur.close()
     db.close()
-
     return row
 
-
-# --------------------------------------------------------
-# 3. FILTRO DE LOCALES POR TIPO (ventas/compras/ganancia)
-# --------------------------------------------------------
 @app.get("/locales/por_filtro")
 def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
 
     if tipo not in ["ventas", "compras", "ganancia"]:
-        raise HTTPException(status_code=400, detail="Tipo inválido. Use: ventas | compras | ganancia")
+        raise HTTPException(status_code=400, detail="Tipo inválido")
 
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Filtro por mes y año
     if mes and anio:
         cur.execute("""
             SELECT 
@@ -124,5 +103,4 @@ def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
     rows = cur.fetchall()
     cur.close()
     db.close()
-
     return rows
