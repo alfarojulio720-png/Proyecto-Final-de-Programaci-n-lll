@@ -1,33 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Mapa de Empresas</title>
-    <link rel="stylesheet" href="styles.css">
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- CSS del mapa -->
+    <link 
+        rel="stylesheet" 
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
 
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .panel {
+            padding: 10px;
+            margin: 10px;
+            background: white;
+            box-shadow: 0 0 5px #0003;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border-radius: 8px;
+        }
+
+        #map {
+            height: 85vh;
+            width: 100%;
+            border-top: 2px solid #ccc;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Mapa de Empresas</h1>
+    <h1>Mapa de Empresas en El Salvador</h1>
 
-<div class="controls">
-    <label>Filtro:</label>
-    <button onclick="cargarFiltro('ventas')">Ventas</button>
-    <button onclick="cargarFiltro('compras')">Compras</button>
-    <button onclick="cargarFiltro('ganancia')">Ganancia</button>
+    <div class="panel">
+        <label><b>Mes:</b></label>
+        <select id="filtroMes">
+            <option value="">--</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+        </select>
 
-    <label>Mes:</label>
-    <input type="month" id="mesinput" onchange="cargarFiltroActual()">
-</div>
+        <label><b>Año:</b></label>
+        <select id="filtroAnio">
+            <option value="">--</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+        </select>
+    </div>
 
-<div id="map"></div>
+    <div id="map"></div>
 
-<script src="app.js"></script>
+    <!-- JS de Leaflet -->
+    <script 
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+    <!-- Tu app.js -->
+    <script src="app.js"></script>
 
 </body>
 </html>
- 
