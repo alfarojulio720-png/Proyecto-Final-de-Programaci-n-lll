@@ -7,7 +7,7 @@ DB_CONF = {
     'host': 'localhost',
     'user': 'root',
     'password': '12345678',
-    'database': 'BD programacion'
+    'database': 'bd_programacion'
 }
 
 # Coordenadas centrales (ejemplo Barcelona). Modifícalas si quieres otra ciudad.
