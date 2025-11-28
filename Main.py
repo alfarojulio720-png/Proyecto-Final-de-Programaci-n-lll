@@ -13,6 +13,10 @@ DB_CONF = {
 def get_db():
     return mysql.connector.connect(**DB_CONF)
 
+
+# ---------------------------------------------------------
+# 1. Obtener todos los locales
+# ---------------------------------------------------------
 @app.get("/locales")
 def get_locales():
     db = get_db()
@@ -20,11 +24,11 @@ def get_locales():
 
     cur.execute("""
         SELECT 
-            l.id_local, 
-            l.nombre_local, 
-            l.latitud, 
-            l.longitud, 
-            l.direccion, 
+            l.id_local,
+            l.nombre_local,
+            l.latitud,
+            l.longitud,
+            l.direccion,
             e.nombre AS empresa
         FROM locales l
         JOIN empresas e ON e.id_empresa = l.id_empresa
@@ -35,8 +39,13 @@ def get_locales():
     db.close()
     return rows
 
+
+# ---------------------------------------------------------
+# 2. Datos mensuales o anuales de un local
+# ---------------------------------------------------------
 @app.get("/local/{id_local}/mensual")
 def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
+
     db = get_db()
     cur = db.cursor(dictionary=True)
 
@@ -48,19 +57,21 @@ def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
         """, (id_local, mes, anio))
 
         row = cur.fetchone()
+
         cur.close()
         db.close()
 
         if not row:
             raise HTTPException(status_code=404, detail="Datos no encontrados")
+
         return row
 
     cur.execute("""
         SELECT 
-            SUM(ventas) AS ventas, 
-            SUM(compras) AS compras, 
-            SUM(ventas) - SUM(compras) AS ganancia
-        FROM movimientos_mensuales 
+            SUM(ventas) AS ventas,
+            SUM(compras) AS compras,
+            SUM(ventas - compras) AS ganancia
+        FROM movimientos_mensuales
         WHERE id_local=%s
     """, (id_local,))
 
@@ -69,6 +80,10 @@ def get_local_mensual(id_local: int, mes: int = None, anio: int = None):
     db.close()
     return row
 
+
+# ---------------------------------------------------------
+# 3. Filtro por ventas/compras/ganancia + fecha
+# ---------------------------------------------------------
 @app.get("/locales/por_filtro")
 def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
 
@@ -79,10 +94,15 @@ def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
     cur = db.cursor(dictionary=True)
 
     if mes and anio:
-        cur.execute("""
+        cur.execute(f"""
             SELECT 
-                l.id_local, l.nombre_local, l.latitud, l.longitud,
-                m.ventas, m.compras, (m.ventas - m.compras) AS ganancia
+                l.id_local,
+                l.nombre_local,
+                l.latitud,
+                l.longitud,
+                m.ventas,
+                m.compras,
+                (m.ventas - m.compras) AS ganancia
             FROM locales l
             JOIN movimientos_mensuales m ON m.id_local = l.id_local
             WHERE m.mes=%s AND m.anio=%s
@@ -91,10 +111,13 @@ def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
     else:
         cur.execute("""
             SELECT 
-                l.id_local, l.nombre_local, l.latitud, l.longitud,
-                SUM(m.ventas) AS ventas, 
-                SUM(m.compras) AS compras, 
-                SUM(m.ventas) - SUM(m.compras) AS ganancia
+                l.id_local,
+                l.nombre_local,
+                l.latitud,
+                l.longitud,
+                SUM(m.ventas) AS ventas,
+                SUM(m.compras) AS compras,
+                SUM(m.ventas - m.compras) AS ganancia
             FROM locales l
             JOIN movimientos_mensuales m ON m.id_local = l.id_local
             GROUP BY l.id_local

@@ -5,11 +5,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let markers = L.layerGroup().addTo(map);
 let currentFiltro = 'ventas';
 let currentMes = null;
-let markerMap = new Map();
 
-// ----------------------
-// Colores por tipo/valor
-// ----------------------
 function colorPorValor(tipo, valor) {
     if (tipo === 'ganancia') {
         return valor >= 0 ? 'green' : 'red';
@@ -17,9 +13,6 @@ function colorPorValor(tipo, valor) {
     return 'blue';
 }
 
-// ----------------------
-// Filtros
-// ----------------------
 function cargarFiltro(tipo = 'ventas') {
     currentFiltro = tipo;
     cargarFiltroActual();
@@ -42,11 +35,10 @@ function cargarFiltroActual() {
         .then(r => r.json())
         .then(data => {
             markers.clearLayers();
-            markerMap.clear();
 
             data.forEach(item => {
-                const val = item[currentFiltro] !== undefined ? Number(item[currentFiltro]) : 0;
-                const c = colorPorValor(currentFiltro, val); // ← CORREGIDO
+                const val = Number(item[currentFiltro]);
+                const c = colorPorValor(currentFiltro, val);
 
                 const marker = L.circleMarker([item.latitud, item.longitud], {
                     radius: 10,
@@ -56,11 +48,9 @@ function cargarFiltroActual() {
                 }).addTo(markers);
 
                 marker.bindPopup(`
-                    <b>${item.nombre}</b><br>
+                    <b>${item.nombre_local}</b><br>
                     ${currentFiltro}: ${val}
                 `);
-
-                markerMap.set(item.id, marker);
             });
         });
 }
