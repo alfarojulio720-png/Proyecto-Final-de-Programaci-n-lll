@@ -18,7 +18,7 @@ function iconoPorGanancia(ganancia) {
         fillColor: ganancia >= 0 ? "lightgreen" : "pink",
         fillOpacity: 0.8,
         weight: 2
-    });
+    }); 
 }
 
 // ----------- Cargar Locales ----------

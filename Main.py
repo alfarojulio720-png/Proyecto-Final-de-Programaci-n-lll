@@ -108,7 +108,7 @@ def locales_por_filtro(tipo: str = "ventas", mes: int = None, anio: int = None):
             WHERE m.mes=%s AND m.anio=%s
         """, (mes, anio))
 
-    else:
+    else: 
         cur.execute("""
             SELECT 
                 l.id_local,

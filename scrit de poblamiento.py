@@ -1,7 +1,7 @@
 import math
 import random
 import mysql.connector
-from datetime import datetime
+from datetime import datetime 
 
 DB_CONF = {
     'host': 'localhost',
