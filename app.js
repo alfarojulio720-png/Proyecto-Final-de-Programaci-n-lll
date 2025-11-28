@@ -1,27 +1,30 @@
 const API = 'http://127.0.0.1:8000';
 
-// Crear mapa
-const map = L.map('map').setView([13.6929, -89.2182], 13);
+// Crear mapa centrado en El Salvador
+const map = L.map('map').setView([13.70, -89.20], 8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 let markers = L.layerGroup().addTo(map);
 
-// Variables de filtros
 let currentMes = null;
 let currentAnio = null;
 
-// ----------- FUNCIÓN PARA CREAR ÍCONO SEGÚN GANANCIA ----------
-function iconoPorGanancia(ganancia) {
-    return L.circleMarker([0, 0], {
-        radius: 10,
-        color: ganancia >= 0 ? "green" : "red",
-        fillColor: ganancia >= 0 ? "lightgreen" : "pink",
-        fillOpacity: 0.8,
-        weight: 2
-    }); 
+// Función para ícono según ganancia
+function iconoGanancia(ganancia) {
+    return L.divIcon({
+        className: "",
+        html: `
+            <div style="
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background-color: ${ganancia >= 0 ? "green" : "red"};
+                border: 2px solid white;">
+            </div>`
+    });
 }
 
-// ----------- Cargar Locales ----------
+// Cargar locales
 async function cargarLocales() {
     markers.clearLayers();
 
@@ -31,7 +34,7 @@ async function cargarLocales() {
     locales.forEach(local => {
         const marker = L.marker([local.latitud, local.longitud]).addTo(markers);
 
-        marker.bindTooltip(local.nombre_local);
+        marker.bindTooltip(`${local.nombre_local} - ${local.empresa}`);
 
         marker.on("click", () => {
             mostrarDatosLocal(local.id_local, local.nombre_local, local.latitud, local.longitud, marker);
@@ -39,7 +42,7 @@ async function cargarLocales() {
     });
 }
 
-// ----------- Mostrar datos de ventas/compras/ganancia ----------
+// Mostrar datos de ventas/compras/ganancia
 async function mostrarDatosLocal(id_local, nombre, lat, lng, marker) {
 
     if (!currentMes || !currentAnio) {
@@ -54,39 +57,28 @@ async function mostrarDatosLocal(id_local, nombre, lat, lng, marker) {
     let compras = data.compras ?? 0;
     let ganancia = ventas - compras;
 
-    // Cambiar color del marcador dependiendo de ganancia
-    const icon = L.divIcon({
-        className: "",
-        html: `
-            <div style="
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background-color: ${ganancia >= 0 ? "green" : "red"};
-                border: 2px solid white;">
-            </div>`
-    });
+    // Actualizar ícono
+    marker.setIcon(iconoGanancia(ganancia));
 
-    marker.setIcon(icon);
-
+    // Popup
     L.popup()
         .setLatLng([lat, lng])
         .setContent(`
             <div style="font-size:14px;">
                 <b>${nombre}</b><br>
-                <hr>
                 <b>Mes:</b> ${currentMes}/${currentAnio}<br><br>
                 <b>Ventas:</b> $${ventas}<br>
                 <b>Compras:</b> $${compras}<br>
-                <b>Ganancia:</b> <span style="color:${ganancia >= 0 ? 'green' : 'red'};">
+                <b>Ganancia:</b> 
+                <span style="color:${ganancia >= 0 ? 'green' : 'red'};">
                     $${ganancia}
-                </span><br>
+                </span>
             </div>
         `)
         .openOn(map);
 }
 
-// ----------- Filtros -----------
+// Filtros
 document.getElementById("filtroMes").addEventListener("change", (e) => {
     currentMes = e.target.value;
     cargarLocales();
@@ -97,5 +89,5 @@ document.getElementById("filtroAnio").addEventListener("change", (e) => {
     cargarLocales();
 });
 
-// ----------- Iniciar -----------
+// Inicio
 cargarLocales();
